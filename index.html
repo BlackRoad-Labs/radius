@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radius — Digital Sandbox for Physical Systems | BlackRoad Labs</title>
+<meta name="description" content="Simulate physics, chemistry, engineering, and biology before building. The CodePen for the physical world. WebAssembly simulations in your browser.">
+<meta name="keywords" content="digital twin, simulation, physics engine, WebAssembly, engineering sandbox, BlackRoad Labs, Radius">
+<meta property="og:title" content="Radius — Digital Sandbox for Physical Systems">
+<meta property="og:description" content="The CodePen for the physical world. Simulate anything before you build it.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://radius.blackroad.io">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gradient: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --card-border: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Gradient Line */
+  .gradient-line {
+    height: 3px;
+    background: var(--gradient);
+    width: 100%;
+  }
+
+  /* Navigation */
+  nav {
+    position: fixed;
+    top: 3px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.92);
+    border-bottom: 1px solid var(--card-border);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+  }
+
+  .nav-logo {
+    width: 36px;
+    height: 36px;
+    background: var(--gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #000;
+  }
+
+  .nav-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text-primary); }
+
+  .nav-cta {
+    background: var(--gradient) !important;
+    color: #000 !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 107, 43, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 107, 43, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-family: var(--font-mono);
+  }
+
+  .hero-badge-dot {
+    width: 8px;
+    height: 8px;
+    background: #00D4FF;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-heading);
+    letter-spacing: -0.03em;
+  }
+
+  .hero-gradient-text {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 640px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    background: var(--gradient);
+    color: #000;
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: var(--font-heading);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 34, 85, 0.3);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    padding: 0.85rem 2rem;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: var(--font-heading);
+    transition: border-color 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: #444; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--card-border);
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* Sections */
+  section { padding: 6rem 2rem; }
+
+  .section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 4rem;
+  }
+
+  .section-header h2 {
+    font-size: 2.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  .section-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Feature cards */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: border-color 0.3s;
+  }
+
+  .feature-card:hover { border-color: #333; }
+
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(135deg, rgba(255, 107, 43, 0.15), rgba(0, 212, 255, 0.15));
+    border: 1px solid var(--card-border);
+  }
+
+  .feature-card h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-family: var(--font-heading);
+  }
+
+  .feature-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  /* Code demo section */
+  .demo-section {
+    background: var(--surface);
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .demo-text h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  .demo-text p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .demo-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .demo-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .demo-features li::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    background: var(--gradient);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .code-block {
+    background: #0d0d0d;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .code-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #333;
+  }
+
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #ffbd2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+
+  .code-body {
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    overflow-x: auto;
+  }
+
+  .code-keyword { color: #CC00AA; }
+  .code-function { color: #4488FF; }
+  .code-string { color: #00D4FF; }
+  .code-comment { color: #444; }
+  .code-number { color: #FF6B2B; }
+  .code-type { color: #FF2255; }
+
+  /* Simulation domains */
+  .domains-section {
+    padding: 6rem 2rem;
+  }
+
+  .domains-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .domain-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .domain-card:hover { border-color: #333; }
+
+  .domain-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .domain-card:hover::before { opacity: 1; }
+
+  .domain-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .domain-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-heading);
+  }
+
+  .domain-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .domain-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .domain-tag {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+  }
+
+  /* Architecture */
+  .arch-section {
+    background: var(--surface);
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .arch-card {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    background: var(--bg);
+  }
+
+  .arch-number {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .arch-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-heading);
+  }
+
+  .arch-card p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  /* Market opportunity */
+  .market-section { padding: 6rem 2rem; }
+
+  .market-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .market-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .market-stat-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    text-align: center;
+  }
+
+  .market-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.25rem;
+  }
+
+  .market-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* Use cases */
+  .usecases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .usecase-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    transition: border-color 0.3s;
+  }
+
+  .usecase-card:hover { border-color: #333; }
+
+  .usecase-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(136, 68, 255, 0.15), rgba(0, 212, 255, 0.15));
+    border: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .usecase-card h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    font-family: var(--font-heading);
+  }
+
+  .usecase-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* Pricing */
+  .pricing-section { padding: 6rem 2rem; }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .pricing-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .pricing-card:hover { border-color: #333; }
+
+  .pricing-card.featured {
+    border-color: #FF2255;
+  }
+
+  .pricing-card.featured::before {
+    content: 'Most Popular';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gradient);
+    color: #000;
+    padding: 0.25rem 1rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .pricing-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-heading);
+  }
+
+  .pricing-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-price {
+    font-size: 3rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: 0.25rem;
+  }
+
+  .pricing-period {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .pricing-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .pricing-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .pricing-features li::before {
+    content: '\2713';
+    color: #00D4FF;
+    font-weight: 700;
+  }
+
+  .pricing-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: var(--font-heading);
+    transition: transform 0.2s;
+  }
+
+  .pricing-btn:hover { transform: translateY(-1px); }
+
+  .pricing-btn-primary {
+    background: var(--gradient);
+    color: #000;
+  }
+
+  .pricing-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+  }
+
+  /* Integrations */
+  .integrations-section {
+    background: var(--surface);
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+    padding: 6rem 2rem;
+  }
+
+  .integrations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .integration-item {
+    background: var(--bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+
+  .integration-item:hover { border-color: #333; }
+
+  .integration-item .emoji {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .integration-item span {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* Testimonial / Quote */
+  .quote-section {
+    padding: 6rem 2rem;
+    text-align: center;
+  }
+
+  .quote-block {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .quote-block blockquote {
+    font-size: 1.75rem;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--text-primary);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+  }
+
+  .quote-author {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+  }
+
+  /* Comparison table */
+  .comparison-section { padding: 6rem 2rem; }
+
+  .comparison-table {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    border-collapse: collapse;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 0.9rem;
+  }
+
+  .comparison-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .comparison-table td:first-child {
+    color: var(--text-secondary);
+  }
+
+  .comparison-table .check { color: #00D4FF; font-weight: 700; }
+  .comparison-table .cross { color: #444; }
+
+  .comparison-table tr:last-child td { border-bottom: none; }
+
+  /* CTA Section */
+  .cta-section {
+    padding: 8rem 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(136, 68, 255, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  .cta-section p {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    max-width: 550px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--card-border);
+    padding: 4rem 2rem 2rem;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .footer-brand p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+
+  .footer-col h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  .footer-col a {
+    display: block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    transition: color 0.2s;
+  }
+
+  .footer-col a:hover { color: var(--text-primary); }
+
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 3rem auto 0;
+    padding-top: 2rem;
+    border-top: 1px solid var(--card-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .demo-grid, .market-grid { grid-template-columns: 1fr; }
+    .arch-grid { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .stats-bar { gap: 2rem; }
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+
+  /* WebAssembly animation */
+  .wasm-viz {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    max-width: 320px;
+    margin: 2rem auto 0;
+  }
+
+  .wasm-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--card-border);
+    animation: wasmPulse 3s infinite;
+  }
+
+  .wasm-cell:nth-child(odd) { animation-delay: 0.5s; }
+  .wasm-cell:nth-child(3n) { animation-delay: 1s; }
+  .wasm-cell:nth-child(5n) { animation-delay: 1.5s; }
+  .wasm-cell.active { background: rgba(0, 212, 255, 0.3); }
+
+  @keyframes wasmPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* Performance counters */
+  .perf-bar {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 3rem;
+  }
+
+  .perf-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .perf-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #28c840;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="gradient-line"></div>
+
+<nav>
+  <a href="#" class="nav-brand">
+    <div class="nav-logo">R</div>
+    <span class="nav-title">Radius</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#domains">Domains</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://github.com/BlackRoad-Labs/radius">GitHub</a>
+    <a href="#cta" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    <span>BlackRoad Labs</span>
+  </div>
+  <h1 class="animate-in">
+    Digital Sandbox for<br>
+    <span class="hero-gradient-text">Physical Systems</span>
+  </h1>
+  <p class="animate-in delay-1">
+    Simulate physics, chemistry, engineering, and biology before building anything.
+    The CodePen for the physical world. WebAssembly simulations running directly
+    in your browser. No downloads. No cloud dependencies. Sovereign compute.
+  </p>
+  <div class="hero-actions animate-in delay-2">
+    <a href="#cta" class="btn-primary">Launch Sandbox</a>
+    <a href="#features" class="btn-secondary">See How It Works</a>
+  </div>
+  <div class="stats-bar animate-in delay-3">
+    <div class="stat-item">
+      <div class="stat-value">$259B</div>
+      <div class="stat-label">Digital Twin Market by 2030</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">10x</div>
+      <div class="stat-label">Faster Than Physical Prototyping</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">WASM</div>
+      <div class="stat-label">Native-Speed in Browser</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">4</div>
+      <div class="stat-label">Simulation Domains</div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="container" style="padding: 6rem 2rem;">
+  <div class="section-header">
+    <h2>Simulate <span class="hero-gradient-text">Everything</span></h2>
+    <p>From fluid dynamics to molecular interactions, Radius provides a universal simulation
+    framework compiled to WebAssembly for near-native performance in any modern browser.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#9881;</div>
+      <h3>WebAssembly Engine</h3>
+      <p>Compiled Rust simulation kernels running at near-native speed. No plugins, no installs.
+      The entire physics engine ships as a single .wasm binary under 2MB. Multithreaded via
+      SharedArrayBuffer for parallel computation across all CPU cores.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#9878;</div>
+      <h3>Real-Time Collaboration</h3>
+      <p>Share simulations with a link. Collaborate on parameter tuning in real time with CRDT-based
+      state synchronization. Every simulation gets a unique URL. Fork, modify, and share — just
+      like code. Version control built into every experiment.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128202;</div>
+      <h3>Data Visualization</h3>
+      <p>GPU-accelerated 3D rendering with WebGPU. Real-time graphs, heatmaps, vector fields,
+      and particle systems. Export raw data as CSV, JSON, or HDF5. Publication-ready plots
+      with LaTeX annotation support for academic papers.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128268;</div>
+      <h3>Plugin Ecosystem</h3>
+      <p>Extend Radius with custom simulation modules. Write plugins in Rust, C++, or AssemblyScript.
+      Community marketplace for shared models. Import CAD files (STEP, STL, OBJ) directly into
+      simulations. Connect to lab equipment APIs.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128274;</div>
+      <h3>Sovereign Compute</h3>
+      <p>Every simulation runs locally in your browser. No data leaves your machine unless you
+      explicitly share it. Air-gapped mode for classified or sensitive research. Full audit log
+      of every parameter change and simulation run.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128640;</div>
+      <h3>Digital Twin Export</h3>
+      <p>Export validated simulations as digital twins for production monitoring. Connect to IoT
+      sensors for real-time calibration. Deploy twins to edge devices (Raspberry Pi, Hailo)
+      for on-premise inference and anomaly detection.</p>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section" style="padding: 6rem 2rem;">
+  <div class="container">
+    <div class="demo-grid">
+      <div class="demo-text">
+        <h2>Write Simulations<br>Like <span class="hero-gradient-text">Code</span></h2>
+        <p>Radius uses a declarative simulation language that feels familiar to any developer.
+        Define your system, set initial conditions, and let the engine handle the numerics.
+        Full TypeScript SDK for programmatic control.</p>
+        <ul class="demo-features">
+          <li>Declarative physics DSL with type inference</li>
+          <li>Hot-reload — change parameters without restarting</li>
+          <li>Built-in unit system (SI, CGS, Imperial)</li>
+          <li>Automatic differentiation for sensitivity analysis</li>
+          <li>GPU compute shaders for particle systems</li>
+        </ul>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+        </div>
+        <div class="code-body">
+<pre><span class="code-comment">// Radius simulation — pendulum system</span>
+<span class="code-keyword">import</span> { <span class="code-function">Simulation</span>, <span class="code-function">Gravity</span>, <span class="code-function">Constraint</span> } <span class="code-keyword">from</span> <span class="code-string">'@radius/core'</span>;
+
+<span class="code-keyword">const</span> sim = <span class="code-keyword">new</span> <span class="code-function">Simulation</span>({
+  <span class="code-function">timestep</span>: <span class="code-number">0.001</span>,       <span class="code-comment">// seconds</span>
+  <span class="code-function">duration</span>: <span class="code-number">30</span>,           <span class="code-comment">// seconds</span>
+  <span class="code-function">renderer</span>: <span class="code-string">'webgpu'</span>,
+});
+
+<span class="code-comment">// Add forces</span>
+sim.<span class="code-function">addForce</span>(<span class="code-keyword">new</span> <span class="code-function">Gravity</span>({ <span class="code-function">g</span>: <span class="code-number">9.81</span> }));
+
+<span class="code-comment">// Define bodies</span>
+<span class="code-keyword">const</span> bob = sim.<span class="code-function">addBody</span>({
+  <span class="code-function">mass</span>: <span class="code-number">1.0</span>,              <span class="code-comment">// kg</span>
+  <span class="code-function">position</span>: [<span class="code-number">2.0</span>, <span class="code-number">0.0</span>],  <span class="code-comment">// meters</span>
+  <span class="code-function">radius</span>: <span class="code-number">0.05</span>,
+  <span class="code-function">material</span>: <span class="code-string">'steel'</span>,
+});
+
+<span class="code-comment">// Pin constraint</span>
+sim.<span class="code-function">addConstraint</span>(<span class="code-keyword">new</span> <span class="code-function">Constraint</span>.<span class="code-type">Rod</span>({
+  <span class="code-function">bodyA</span>: <span class="code-string">'origin'</span>,
+  <span class="code-function">bodyB</span>: bob,
+  <span class="code-function">length</span>: <span class="code-number">2.0</span>,
+}));
+
+<span class="code-comment">// Run and observe</span>
+sim.<span class="code-function">onFrame</span>((<span class="code-function">state</span>) => {
+  <span class="code-function">console</span>.<span class="code-function">log</span>(state.<span class="code-function">energy</span>);
+});
+
+sim.<span class="code-function">run</span>();</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="domains" class="domains-section container">
+  <div class="section-header">
+    <h2>Four Simulation <span class="hero-gradient-text">Domains</span></h2>
+    <p>Radius covers the four pillars of physical simulation. Each domain has specialized
+    solvers, material libraries, and visualization tools.</p>
+  </div>
+  <div class="domains-grid">
+    <div class="domain-card">
+      <span class="domain-emoji">&#9881;</span>
+      <h3>Physics &amp; Engineering</h3>
+      <p>Rigid body dynamics, finite element analysis, fluid dynamics (CFD),
+      structural mechanics, thermodynamics. From bridge stress analysis to
+      rocket trajectory optimization.</p>
+      <div class="domain-tags">
+        <span class="domain-tag">FEA</span>
+        <span class="domain-tag">CFD</span>
+        <span class="domain-tag">rigid body</span>
+        <span class="domain-tag">thermodynamics</span>
+        <span class="domain-tag">materials</span>
+      </div>
+    </div>
+    <div class="domain-card">
+      <span class="domain-emoji">&#9878;</span>
+      <h3>Chemistry &amp; Materials</h3>
+      <p>Molecular dynamics, reaction kinetics, crystal structure prediction,
+      polymer chain simulation, electrochemistry. Discover new materials
+      computationally before synthesizing them.</p>
+      <div class="domain-tags">
+        <span class="domain-tag">MD</span>
+        <span class="domain-tag">DFT</span>
+        <span class="domain-tag">kinetics</span>
+        <span class="domain-tag">crystallography</span>
+        <span class="domain-tag">polymers</span>
+      </div>
+    </div>
+    <div class="domain-card">
+      <span class="domain-emoji">&#129516;</span>
+      <h3>Biology &amp; Life Sciences</h3>
+      <p>Protein folding, gene regulatory networks, population dynamics,
+      epidemiological modeling, neural circuit simulation. From molecules
+      to ecosystems in a single platform.</p>
+      <div class="domain-tags">
+        <span class="domain-tag">protein</span>
+        <span class="domain-tag">genomics</span>
+        <span class="domain-tag">epidemiology</span>
+        <span class="domain-tag">neural</span>
+        <span class="domain-tag">ecology</span>
+      </div>
+    </div>
+    <div class="domain-card">
+      <span class="domain-emoji">&#127758;</span>
+      <h3>Earth &amp; Climate</h3>
+      <p>Weather modeling, ocean circulation, seismology, hydrology,
+      atmospheric chemistry. Global and regional climate models with
+      satellite data integration for validation.</p>
+      <div class="domain-tags">
+        <span class="domain-tag">climate</span>
+        <span class="domain-tag">weather</span>
+        <span class="domain-tag">ocean</span>
+        <span class="domain-tag">seismic</span>
+        <span class="domain-tag">hydrology</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="architecture" class="arch-section" style="padding: 6rem 2rem;">
+  <div class="container">
+    <div class="section-header">
+      <h2>How Radius <span class="hero-gradient-text">Works</span></h2>
+      <p>A four-layer architecture designed for performance, extensibility, and sovereignty.</p>
+    </div>
+    <div class="arch-grid">
+      <div class="arch-card">
+        <span class="arch-number">01</span>
+        <h3>Model Definition</h3>
+        <p>Define your system using the Radius DSL or TypeScript SDK. Declare bodies, forces, constraints, and boundary conditions.</p>
+      </div>
+      <div class="arch-card">
+        <span class="arch-number">02</span>
+        <h3>Compilation</h3>
+        <p>The Radius compiler optimizes your model and emits a .wasm binary with specialized numerical solvers for your system type.</p>
+      </div>
+      <div class="arch-card">
+        <span class="arch-number">03</span>
+        <h3>Execution</h3>
+        <p>Run the simulation in your browser using WebAssembly with SIMD and threading support. GPU compute via WebGPU for particles.</p>
+      </div>
+      <div class="arch-card">
+        <span class="arch-number">04</span>
+        <h3>Analysis</h3>
+        <p>Real-time visualization, data export, sensitivity analysis, and digital twin deployment to edge devices or cloud.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="market-section container">
+  <div class="section-header">
+    <h2>The <span class="hero-gradient-text">Market</span> Opportunity</h2>
+    <p>Digital twins and simulation are no longer optional. Every major industry is adopting virtual prototyping. Radius democratizes access.</p>
+  </div>
+  <div class="market-grid">
+    <div>
+      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Who's Already Proving the Value</h3>
+      <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem;">
+        SpaceX simulates every Raptor engine cycle before firing. Boeing runs digital wind tunnels.
+        Pfizer models drug interactions computationally. Tesla stress-tests battery chemistries
+        in silicon. These companies spend tens of millions on proprietary tools.
+      </p>
+      <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem;">
+        Radius puts the same power in the browser. A graduate student in Lagos should have the
+        same simulation capabilities as an engineer at SpaceX. That is the mission.
+      </p>
+      <p style="color: var(--text-secondary); line-height: 1.8;">
+        The digital twin market is projected to grow from $25 billion (2023) to $259 billion
+        by 2030 — a 10x expansion driven by IoT, AI, and the need for virtual prototyping
+        across every industry from manufacturing to healthcare.
+      </p>
+    </div>
+    <div class="market-stat-grid">
+      <div class="market-stat-card">
+        <div class="market-stat-value">$25B</div>
+        <div class="market-stat-label">Digital Twin Market (2023)</div>
+      </div>
+      <div class="market-stat-card">
+        <div class="market-stat-value">$259B</div>
+        <div class="market-stat-label">Projected by 2030</div>
+      </div>
+      <div class="market-stat-card">
+        <div class="market-stat-value">10.4x</div>
+        <div class="market-stat-label">Market Growth Factor</div>
+      </div>
+      <div class="market-stat-card">
+        <div class="market-stat-value">38%</div>
+        <div class="market-stat-label">CAGR Through 2030</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="padding: 6rem 2rem;">
+  <div class="section-header">
+    <h2>Use <span class="hero-gradient-text">Cases</span></h2>
+    <p>From academic research to industrial R&amp;D, Radius adapts to any simulation workflow.</p>
+  </div>
+  <div class="usecases-grid">
+    <div class="usecase-card">
+      <div class="usecase-icon">&#128300;</div>
+      <div>
+        <h3>Academic Research</h3>
+        <p>Run reproducible simulations for papers. Share via URL. Reviewers can verify by re-running with the same parameters. Cite with DOI integration.</p>
+      </div>
+    </div>
+    <div class="usecase-card">
+      <div class="usecase-icon">&#127981;</div>
+      <div>
+        <h3>Manufacturing</h3>
+        <p>Stress-test designs before cutting metal. Run thousands of parameter sweeps overnight. Reduce physical prototyping cycles by 80% and time-to-market by months.</p>
+      </div>
+    </div>
+    <div class="usecase-card">
+      <div class="usecase-icon">&#128138;</div>
+      <div>
+        <h3>Pharmaceutical</h3>
+        <p>Model drug-receptor interactions. Simulate pharmacokinetics across patient populations. Screen thousands of candidate molecules computationally before wet lab trials.</p>
+      </div>
+    </div>
+    <div class="usecase-card">
+      <div class="usecase-icon">&#127979;</div>
+      <div>
+        <h3>Education</h3>
+        <p>Interactive physics, chemistry, and biology labs. Students manipulate real simulations, not animations. Build intuition for complex systems through experimentation.</p>
+      </div>
+    </div>
+    <div class="usecase-card">
+      <div class="usecase-icon">&#128752;</div>
+      <div>
+        <h3>Aerospace</h3>
+        <p>Trajectory optimization, aero-thermal analysis, structural vibration modes. Validate designs against extreme conditions without building expensive physical prototypes.</p>
+      </div>
+    </div>
+    <div class="usecase-card">
+      <div class="usecase-icon">&#9889;</div>
+      <div>
+        <h3>Energy</h3>
+        <p>Battery chemistry simulation, solar cell optimization, wind farm layout modeling, grid stability analysis. Accelerate the transition to sustainable energy systems.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" class="pricing-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Simple, Transparent <span class="hero-gradient-text">Pricing</span></h2>
+      <p>Start free. Scale when you need to. No surprise charges. No data lock-in.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Sandbox</div>
+        <div class="pricing-desc">For students and hobbyists</div>
+        <div class="pricing-price">Free</div>
+        <div class="pricing-period">forever</div>
+        <ul class="pricing-features">
+          <li>Unlimited browser simulations</li>
+          <li>All 4 simulation domains</li>
+          <li>Community plugins</li>
+          <li>Public simulation sharing</li>
+          <li>CSV / JSON data export</li>
+          <li>10 saved simulations</li>
+        </ul>
+        <a href="#cta" class="pricing-btn pricing-btn-secondary">Start Free</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-name">Research</div>
+        <div class="pricing-desc">For labs and independent researchers</div>
+        <div class="pricing-price">$49<span style="font-size: 1rem; color: var(--text-muted);">/mo</span></div>
+        <div class="pricing-period">per researcher, billed annually</div>
+        <ul class="pricing-features">
+          <li>Everything in Sandbox</li>
+          <li>Unlimited saved simulations</li>
+          <li>Private simulation sharing</li>
+          <li>HDF5 / LaTeX export</li>
+          <li>Priority GPU compute</li>
+          <li>DOI citation integration</li>
+          <li>Team collaboration (5 seats)</li>
+          <li>API access</li>
+        </ul>
+        <a href="#cta" class="pricing-btn pricing-btn-primary">Start Research Trial</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-name">Enterprise</div>
+        <div class="pricing-desc">For companies and institutions</div>
+        <div class="pricing-price">$299<span style="font-size: 1rem; color: var(--text-muted);">/mo</span></div>
+        <div class="pricing-period">per seat, billed annually</div>
+        <ul class="pricing-features">
+          <li>Everything in Research</li>
+          <li>Self-hosted deployment</li>
+          <li>Air-gapped mode (ITAR/EAR)</li>
+          <li>Custom plugin development</li>
+          <li>Digital twin export &amp; IoT</li>
+          <li>SSO / SAML integration</li>
+          <li>Dedicated support engineer</li>
+          <li>SLA guarantee (99.9%)</li>
+        </ul>
+        <a href="#cta" class="pricing-btn pricing-btn-secondary">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="comparison-section container">
+  <div class="section-header">
+    <h2>Radius vs. <span class="hero-gradient-text">Legacy Tools</span></h2>
+    <p>How Radius compares to traditional simulation software.</p>
+  </div>
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Radius</th>
+        <th>ANSYS / COMSOL</th>
+        <th>MATLAB</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Runs in browser</td>
+        <td class="check">&#10003;</td>
+        <td class="cross">&#10007;</td>
+        <td class="cross">&#10007;</td>
+      </tr>
+      <tr>
+        <td>No installation required</td>
+        <td class="check">&#10003;</td>
+        <td class="cross">&#10007;</td>
+        <td class="cross">&#10007;</td>
+      </tr>
+      <tr>
+        <td>Real-time collaboration</td>
+        <td class="check">&#10003;</td>
+        <td class="cross">&#10007;</td>
+        <td class="cross">&#10007;</td>
+      </tr>
+      <tr>
+        <td>WebAssembly engine</td>
+        <td class="check">&#10003;</td>
+        <td class="cross">&#10007;</td>
+        <td class="cross">&#10007;</td>
+      </tr>
+      <tr>
+        <td>Open plugin ecosystem</td>
+        <td class="check">&#10003;</td>
+        <td class="cross">Limited</td>
+        <td class="check">Toolboxes</td>
+      </tr>
+      <tr>
+        <td>Self-hosted option</td>
+        <td class="check">&#10003;</td>
+        <td class="check">&#10003;</td>
+        <td class="check">&#10003;</td>
+      </tr>
+      <tr>
+        <td>Air-gapped mode</td>
+        <td class="check">&#10003;</td>
+        <td class="check">&#10003;</td>
+        <td class="check">&#10003;</td>
+      </tr>
+      <tr>
+        <td>Starting price</td>
+        <td class="check">Free</td>
+        <td class="cross">$30k+/yr</td>
+        <td class="cross">$2k+/yr</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="integrations-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Integrates With Your <span class="hero-gradient-text">Stack</span></h2>
+      <p>Radius connects to the tools and platforms you already use.</p>
+    </div>
+    <div class="integrations-grid">
+      <div class="integration-item">
+        <span class="emoji">&#128187;</span>
+        <span>VS Code Extension</span>
+      </div>
+      <div class="integration-item">
+        <span class="emoji">&#128196;</span>
+        <span>Jupyter Notebooks</span>
+      </div>
+      <div class="integration-item">
+        <span class="emoji">&#128230;</span>
+        <span>Docker / K8s</span>
+      </div>
+      <div class="integration-item">
+        <span class="emoji">&#128200;</span>
+        <span>Grafana Dashboards</span>
+      </div>
+      <div class="integration-item">
+        <span class="emoji">&#129302;</span>
+        <span>Python / NumPy</span>
+      </div>
+      <div class="integration-item">
+        <span class="emoji">&#9881;</span>
+        <span>Rust / C++ SDK</span>
+      </div>
+      <div class="integration-item">
+        <span class="emoji">&#128225;</span>
+        <span>MQTT / IoT</span>
+      </div>
+      <div class="integration-item">
+        <span class="emoji">&#128194;</span>
+        <span>CAD Import</span>
+      </div>
+    </div>
+    <div class="perf-bar">
+      <div class="perf-item"><div class="perf-dot"></div> WASM SIMD Enabled</div>
+      <div class="perf-item"><div class="perf-dot"></div> SharedArrayBuffer Threads</div>
+      <div class="perf-item"><div class="perf-dot"></div> WebGPU Compute Shaders</div>
+      <div class="perf-item"><div class="perf-dot"></div> Sub-ms Timestep Precision</div>
+    </div>
+  </div>
+</section>
+
+<section class="quote-section">
+  <div class="quote-block">
+    <blockquote>"The best way to predict the future is to simulate it."</blockquote>
+    <div class="quote-author">Radius Philosophy &mdash; Simulate before you build.</div>
+  </div>
+</section>
+
+<section id="cta" class="cta-section">
+  <h2>Start Simulating <span class="hero-gradient-text">Today</span></h2>
+  <p>No downloads. No credit card. Open your browser and start building the future
+  of physical simulation.</p>
+  <div class="hero-actions">
+    <a href="#" class="btn-primary">Launch Free Sandbox</a>
+    <a href="https://github.com/BlackRoad-Labs/radius" class="btn-secondary">View on GitHub</a>
+  </div>
+  <div class="wasm-viz">
+    <div class="wasm-cell"></div><div class="wasm-cell active"></div><div class="wasm-cell"></div><div class="wasm-cell active"></div>
+    <div class="wasm-cell active"></div><div class="wasm-cell"></div><div class="wasm-cell active"></div><div class="wasm-cell"></div>
+    <div class="wasm-cell"></div><div class="wasm-cell active"></div><div class="wasm-cell"></div><div class="wasm-cell"></div>
+    <div class="wasm-cell active"></div><div class="wasm-cell"></div><div class="wasm-cell active"></div><div class="wasm-cell active"></div>
+    <div class="wasm-cell"></div><div class="wasm-cell"></div><div class="wasm-cell active"></div><div class="wasm-cell"></div>
+    <div class="wasm-cell active"></div><div class="wasm-cell active"></div><div class="wasm-cell"></div><div class="wasm-cell active"></div>
+    <div class="wasm-cell active"></div><div class="wasm-cell"></div><div class="wasm-cell"></div><div class="wasm-cell active"></div>
+    <div class="wasm-cell"></div><div class="wasm-cell active"></div><div class="wasm-cell active"></div><div class="wasm-cell"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="nav-logo">R</div>
+        <span class="nav-title">Radius</span>
+      </div>
+      <p>Digital sandbox for physical systems. Built by BlackRoad Labs.
+      Simulate physics, chemistry, engineering, and biology before building.
+      Sovereign compute. No cloud dependency. Pave Tomorrow.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#domains">Domains</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#">Documentation</a>
+      <a href="#">Changelog</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a href="#">Getting Started</a>
+      <a href="#">Plugin SDK</a>
+      <a href="#">API Reference</a>
+      <a href="#">Examples</a>
+      <a href="#">Community</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+      <a href="https://github.com/BlackRoad-Labs">BlackRoad Labs</a>
+      <a href="#">Careers</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span>radius.blackroad.io</span>
+  </div>
+</footer>
+</body>
+</html>
